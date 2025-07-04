@@ -146,28 +146,128 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     });
 
-    // Testimonials auto-rotation (optional enhancement)
+    // Testimonials Carousel
+    const testimonialsContainer = document.querySelector('.testimonials-container');
     const testimonialCards = document.querySelectorAll('.testimonial-card');
-    let currentTestimonial = 0;
-
-    function highlightTestimonial() {
-        testimonialCards.forEach((card, index) => {
-            if (index === currentTestimonial) {
-                card.style.transform = 'translateY(-10px) scale(1.02)';
-                card.style.boxShadow = '0 8px 30px rgba(37, 99, 235, 0.2)';
-            } else {
-                card.style.transform = 'translateY(0) scale(1)';
-                card.style.boxShadow = '0 2px 10px rgba(0, 0, 0, 0.1)';
+    const prevBtn = document.querySelector('.prev-btn');
+    const nextBtn = document.querySelector('.next-btn');
+    const dotsContainer = document.querySelector('.carousel-dots');
+    
+    let currentSlide = 0;
+    let autoSlideInterval;
+    let isTransitioning = false;
+    
+    // Create dots for navigation
+    function createDots() {
+        if (!dotsContainer) return;
+        
+        testimonialCards.forEach((_, index) => {
+            const dot = document.createElement('div');
+            dot.classList.add('carousel-dot');
+            if (index === 0) dot.classList.add('active');
+            dot.addEventListener('click', () => {
+                if (!isTransitioning) goToSlide(index);
+            });
+            dotsContainer.appendChild(dot);
+        });
+    }
+    
+    // Update dots
+    function updateDots() {
+        const dots = document.querySelectorAll('.carousel-dot');
+        dots.forEach((dot, index) => {
+            dot.classList.toggle('active', index === currentSlide);
+        });
+    }
+    
+    // Go to specific slide
+    function goToSlide(slideIndex) {
+        if (!testimonialsContainer || isTransitioning || slideIndex === currentSlide) return;
+        
+        isTransitioning = true;
+        currentSlide = slideIndex;
+        
+        // Use pixel-based translation for mobile devices to ensure precise positioning
+        const isMobile = window.innerWidth <= 480;
+        let translateX;
+        
+        if (isMobile) {
+            const cardWidth = window.innerWidth;
+            translateX = -currentSlide * cardWidth;
+            testimonialsContainer.style.transform = `translateX(${translateX}px)`;
+        } else {
+            translateX = -currentSlide * 100;
+            testimonialsContainer.style.transform = `translateX(${translateX}%)`;
+        }
+        
+        updateDots();
+        
+        // Reset transition flag after animation completes
+        setTimeout(() => {
+            isTransitioning = false;
+        }, 500);
+    }
+    
+    // Next slide
+    function nextSlide() {
+        if (isTransitioning) return;
+        const nextIndex = (currentSlide + 1) % testimonialCards.length;
+        goToSlide(nextIndex);
+    }
+    
+    // Previous slide
+    function prevSlide() {
+        if (isTransitioning) return;
+        const prevIndex = currentSlide === 0 ? testimonialCards.length - 1 : currentSlide - 1;
+        goToSlide(prevIndex);
+    }
+    
+    // Auto slide
+    function startAutoSlide() {
+        if (autoSlideInterval) clearInterval(autoSlideInterval);
+        autoSlideInterval = setInterval(nextSlide, 5000);
+    }
+    
+    function stopAutoSlide() {
+        if (autoSlideInterval) {
+            clearInterval(autoSlideInterval);
+            autoSlideInterval = null;
+        }
+    }
+    
+    // Initialize carousel
+    if (testimonialsContainer && testimonialCards.length > 0) {
+        createDots();
+        
+        // Event listeners for buttons
+        if (nextBtn) nextBtn.addEventListener('click', () => {
+            if (isTransitioning) return;
+            stopAutoSlide();
+            nextSlide();
+            setTimeout(startAutoSlide, 7000);
+        });
+        
+        if (prevBtn) prevBtn.addEventListener('click', () => {
+            if (isTransitioning) return;
+            stopAutoSlide();
+            prevSlide();
+            setTimeout(startAutoSlide, 7000);
+        });
+        
+        // Pause on hover
+        testimonialsContainer.addEventListener('mouseenter', stopAutoSlide);
+        testimonialsContainer.addEventListener('mouseleave', startAutoSlide);
+        
+        // Handle window resize to recalculate position
+        window.addEventListener('resize', () => {
+            if (!isTransitioning) {
+                goToSlide(currentSlide);
             }
         });
         
-        currentTestimonial = (currentTestimonial + 1) % testimonialCards.length;
+        // Start auto slide after page load
+        setTimeout(startAutoSlide, 3000);
     }
-
-    // Start testimonial rotation after page load
-    setTimeout(() => {
-        setInterval(highlightTestimonial, 3000);
-    }, 2000);
 
     // Form validation for future contact forms
     function validateEmail(email) {

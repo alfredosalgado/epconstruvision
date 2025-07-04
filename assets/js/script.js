@@ -1,5 +1,25 @@
+/**
+ * Función Debounce
+ * Limita la frecuencia de ejecución de una función.
+ * @param {function} func - La función a ejecutar.
+ * @param {number} delay - El tiempo de espera en milisegundos.
+ * @returns {function} - La nueva función "debounced".
+ */
+function debounce(func, delay) {
+    let timeout;
+    return function(...args) {
+        const context = this;
+        clearTimeout(timeout);
+        timeout = setTimeout(() => func.apply(context, args), delay);
+    };
+}
+
 // DOM Content Loaded
 document.addEventListener('DOMContentLoaded', function() {
+    // Inicialización de la galería
+    if (typeof initGallery === 'function') {
+        initGallery();
+    }
     
     // Mobile menu toggle
     const mobileMenu = document.getElementById('mobile-menu');
@@ -442,8 +462,380 @@ document.addEventListener('DOMContentLoaded', function() {
 
 
 
+    // Inicializar galería
+    initGallery();
+
     console.log('EP ConstruVisión website loaded successfully!');
 });
+
+/**
+ * Inicialización de la galería interactiva
+ * Maneja el carrusel, modal y todas las interacciones
+ */
+function initGallery() {
+    // CONFIGURACIÓN PRINCIPAL
+    const TOTAL_IMAGES = 29; // Número total de imágenes en la carpeta galeria
+    const AUTO_ADVANCE_INTERVAL = 4000; // Tiempo para avance automático (4 segundos)
+    
+    // Elementos DOM principales
+    const galleryContainer = document.querySelector('.gallery-container');
+    const modal = document.getElementById('galleryModal');
+    const modalImg = document.getElementById('modalImage');
+    const closeModal = document.querySelector('.modal-close');
+    const prevModalBtn = document.querySelector('.modal-prev');
+    const nextModalBtn = document.querySelector('.modal-next');
+    const prevCarouselBtn = document.querySelector('.gallery-prev');
+    const nextCarouselBtn = document.querySelector('.gallery-next');
+    const indicators = document.querySelector('.gallery-indicators');
+    
+    // Verificar que los elementos principales existan
+    if (!galleryContainer || !indicators) {
+        console.log('Gallery elements not found, skipping gallery initialization');
+        return;
+    }
+    
+    // Variables de estado
+    let currentCarouselIndex = 0; // Índice actual del carrusel
+    let currentModalIndex = 0; // Índice actual del modal
+    let imagesPerView = getImagesPerView(); // Imágenes por vista según pantalla
+    let totalSlides = Math.ceil(TOTAL_IMAGES / imagesPerView); // Total de slides
+    let autoAdvanceTimer = null; // Timer para avance automático
+    let isUserInteracting = false; // Flag para pausar auto-avance
+    
+    /**
+     * Determina cuántas imágenes mostrar según el tamaño de pantalla
+     * @returns {number} Número de imágenes por vista
+     */
+    function getImagesPerView() {
+        const width = window.innerWidth;
+        if (width >= 768) {
+            return 4; // PC/Desktop - mostrar 4 imágenes
+        } else {
+            return 2; // Mobile - mostrar 2 imágenes
+        }
+    }
+
+    /**
+     * Genera dinámicamente las imágenes para el slide actual
+     * Crea elementos DOM y asigna eventos de click
+     */
+    function generateGalleryImages() {
+        if (!galleryContainer) {
+            console.log('Gallery container not found');
+            return;
+        }
+        
+        console.log('Generating gallery images for slide', currentCarouselIndex);
+        console.log('Container found:', galleryContainer);
+        
+        galleryContainer.innerHTML = ''; // Limpia contenedor
+        
+        // Calcula qué imágenes mostrar en el slide actual
+        const startIndex = currentCarouselIndex * imagesPerView;
+        const endIndex = Math.min(startIndex + imagesPerView, TOTAL_IMAGES);
+        
+        console.log('Showing images from index', startIndex, 'to', endIndex);
+        
+        // Crea elementos para cada imagen
+        for (let i = startIndex; i < endIndex; i++) {
+            const imageNumber = i + 1;
+            const galleryItem = document.createElement('div');
+            galleryItem.className = 'gallery-item';
+            galleryItem.innerHTML = `
+                <img src="./assets/img/galeria/${imageNumber}.jpg" alt="Proyecto ${imageNumber}" loading="lazy">
+                <div class="gallery-overlay">
+                    <i class="fas fa-search-plus"></i>
+                </div>
+            `;
+            
+            // Asigna evento click para abrir modal
+            galleryItem.addEventListener('click', () => {
+                openModal(i);
+            });
+            
+            galleryContainer.appendChild(galleryItem);
+        }
+    }
+    
+    /**
+     * Genera los indicadores del carrusel
+     * Crea puntos que muestran la posición actual
+     */
+    function generateIndicators() {
+        if (!indicators) return;
+        
+        indicators.innerHTML = '';
+        for (let i = 0; i < totalSlides; i++) {
+            const indicator = document.createElement('span');
+            indicator.className = 'gallery-indicator';
+            if (i === 0) indicator.classList.add('active');
+            indicators.appendChild(indicator);
+        }
+        // Asigna eventos después de crear indicadores
+        attachIndicatorListeners();
+    }
+
+    /**
+     * Actualiza la vista del carrusel
+     * Regenera imágenes y actualiza indicadores
+     */
+    function updateCarousel() {
+        generateGalleryImages();
+        
+        // Actualiza estado de indicadores
+        const allIndicators = document.querySelectorAll('.gallery-indicator');
+        allIndicators.forEach((indicator, index) => {
+            indicator.classList.toggle('active', index === currentCarouselIndex);
+        });
+    }
+    
+    /**
+     * Navega a un slide específico
+     * @param {number} index - Índice del slide destino
+     */
+    function goToSlide(index) {
+        currentCarouselIndex = index;
+        updateCarousel();
+    }
+    
+    // FUNCIONES DE AVANCE AUTOMÁTICO
+    
+    /**
+     * Inicia el avance automático del carrusel
+     */
+    function startAutoAdvance() {
+        if (autoAdvanceTimer) {
+            clearInterval(autoAdvanceTimer);
+        }
+        autoAdvanceTimer = setInterval(() => {
+            if (!isUserInteracting && totalSlides > 1) {
+                nextSlide();
+            }
+        }, AUTO_ADVANCE_INTERVAL);
+    }
+    
+    /**
+     * Detiene el avance automático
+     */
+    function stopAutoAdvance() {
+        if (autoAdvanceTimer) {
+            clearInterval(autoAdvanceTimer);
+            autoAdvanceTimer = null;
+        }
+    }
+    
+    /**
+     * Reinicia el avance automático después de interacción
+     */
+    function resetAutoAdvance() {
+        stopAutoAdvance();
+        setTimeout(() => {
+            if (!isUserInteracting) {
+                startAutoAdvance();
+            }
+        }, 1000); // Espera 1 segundo antes de reanudar
+    }
+    
+    // NAVEGACIÓN DEL CARRUSEL
+    
+    /**
+     * Avanza al siguiente slide
+     */
+    function nextSlide() {
+        currentCarouselIndex = (currentCarouselIndex + 1) % totalSlides;
+        updateCarousel();
+    }
+    
+    /**
+     * Retrocede al slide anterior
+     */
+    function prevSlide() {
+        currentCarouselIndex = (currentCarouselIndex - 1 + totalSlides) % totalSlides;
+        updateCarousel();
+    }
+
+    // FUNCIONES DEL MODAL
+    
+    /**
+     * Abre el modal con una imagen específica
+     * @param {number} imageIndex - Índice de la imagen a mostrar
+     */
+    function openModal(imageIndex) {
+        currentModalIndex = imageIndex;
+        modalImg.src = `./assets/img/galeria/${imageIndex + 1}.jpg`;
+        modalImg.alt = `Proyecto ${imageIndex + 1}`;
+        modal.style.display = 'flex';
+        document.body.style.overflow = 'hidden'; // Previene scroll del body
+    }
+    
+    /**
+     * Cierra el modal
+     */
+    function closeModalFunc() {
+        modal.style.display = 'none';
+        document.body.style.overflow = 'auto'; // Restaura scroll del body
+    }
+    
+    /**
+     * Navega a la siguiente imagen en el modal
+     */
+    function nextModalImage() {
+        currentModalIndex = (currentModalIndex + 1) % TOTAL_IMAGES;
+        modalImg.src = `./assets/img/galeria/${currentModalIndex + 1}.jpg`;
+        modalImg.alt = `Proyecto ${currentModalIndex + 1}`;
+    }
+    
+    /**
+     * Navega a la imagen anterior en el modal
+     */
+    function prevModalImage() {
+        currentModalIndex = (currentModalIndex - 1 + TOTAL_IMAGES) % TOTAL_IMAGES;
+        modalImg.src = `./assets/img/galeria/${currentModalIndex + 1}.jpg`;
+        modalImg.alt = `Proyecto ${currentModalIndex + 1}`;
+    }
+    
+    // EVENT LISTENERS DEL CARRUSEL
+    
+    // Botón siguiente con control de auto-avance
+    if (nextCarouselBtn) {
+        nextCarouselBtn.addEventListener('click', () => {
+            isUserInteracting = true;
+            nextSlide();
+            resetAutoAdvance();
+            setTimeout(() => { isUserInteracting = false; }, 500);
+        });
+    }
+    
+    // Botón anterior con control de auto-avance
+    if (prevCarouselBtn) {
+        prevCarouselBtn.addEventListener('click', () => {
+            isUserInteracting = true;
+            prevSlide();
+            resetAutoAdvance();
+            setTimeout(() => { isUserInteracting = false; }, 500);
+        });
+    }
+    
+    /**
+     * Asigna eventos a los indicadores
+     */
+    function attachIndicatorListeners() {
+        const allIndicators = document.querySelectorAll('.gallery-indicator');
+        allIndicators.forEach((indicator, index) => {
+            indicator.addEventListener('click', () => {
+                isUserInteracting = true;
+                goToSlide(index);
+                resetAutoAdvance();
+                setTimeout(() => { isUserInteracting = false; }, 500);
+            });
+        });
+    }
+
+    // EVENT LISTENERS DEL MODAL
+    
+    // Cerrar modal
+    if (closeModal) {
+        closeModal.addEventListener('click', closeModalFunc);
+    }
+    
+    // Navegación en modal
+    if (nextModalBtn) {
+        nextModalBtn.addEventListener('click', nextModalImage);
+    }
+    
+    if (prevModalBtn) {
+        prevModalBtn.addEventListener('click', prevModalImage);
+    }
+    
+    // Cerrar modal al hacer click fuera de la imagen
+    if (modal) {
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                closeModalFunc();
+            }
+        });
+    }
+    
+    // NAVEGACIÓN CON TECLADO
+    document.addEventListener('keydown', (e) => {
+        if (modal.style.display === 'flex') {
+            if (e.key === 'Escape') {
+                closeModalFunc();
+            } else if (e.key === 'ArrowRight') {
+                nextModalImage();
+            } else if (e.key === 'ArrowLeft') {
+                prevModalImage();
+            }
+        }
+    });
+    
+    // MANEJO DE CAMBIOS DE TAMAÑO DE VENTANA
+    function handleResize() {
+        const newImagesPerView = getImagesPerView();
+        if (newImagesPerView !== imagesPerView) {
+            imagesPerView = newImagesPerView;
+            totalSlides = Math.ceil(TOTAL_IMAGES / imagesPerView);
+            // Asegura que el índice actual sea válido
+            if (currentCarouselIndex >= totalSlides) {
+                currentCarouselIndex = totalSlides - 1;
+            }
+            generateIndicators();
+            updateCarousel();
+        }
+    }
+    
+    window.addEventListener('resize', debounce(handleResize, 250));
+    
+    // CONTROL DE AUTO-AVANCE EN HOVER
+    if (galleryContainer) {
+        galleryContainer.addEventListener('mouseenter', () => {
+            isUserInteracting = true;
+            stopAutoAdvance();
+        });
+        
+        galleryContainer.addEventListener('mouseleave', () => {
+            isUserInteracting = false;
+            startAutoAdvance();
+        });
+    }
+    
+    // INICIALIZACIÓN
+    console.log('Initializing gallery with', TOTAL_IMAGES, 'images');
+    console.log('Images per view:', imagesPerView);
+    console.log('Total slides:', totalSlides);
+    
+    // Función para inicializar la galería de forma robusta
+    function initializeGallery() {
+        console.log('Attempting to initialize gallery...');
+        generateIndicators();
+        updateCarousel();
+        
+        // Verificar si las imágenes se generaron correctamente
+        setTimeout(() => {
+            const generatedImages = galleryContainer.querySelectorAll('.gallery-item');
+            console.log('Generated images count:', generatedImages.length);
+            
+            if (generatedImages.length === 0) {
+                console.log('No images generated, forcing regeneration...');
+                generateGalleryImages();
+            }
+        }, 50);
+    }
+    
+    // Intentar inicialización inmediata
+    initializeGallery();
+    
+    // Intentar nuevamente después de un breve delay
+    setTimeout(initializeGallery, 100);
+    
+    // Intentar una vez más después de un delay mayor
+    setTimeout(initializeGallery, 500);
+    
+    // Inicia auto-avance si hay más de una imagen
+    if (totalSlides > 1) {
+        startAutoAdvance();
+    }
+}
 
 // Additional utility functions
 function isMobile() {

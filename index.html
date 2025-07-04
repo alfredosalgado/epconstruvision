@@ -260,6 +260,60 @@
         </div>
     </section>
 
+    <!-- Gallery Section - Carrusel con modal -->
+    <section id="galeria" class="gallery" role="region" aria-labelledby="gallery-heading">
+        <div class="container">
+            <!-- Encabezado de la sección -->
+            <div class="section-header">
+                <h2 id="gallery-heading">Galería de Trabajos</h2>
+                <div class="section-divider" role="presentation"></div>
+                <p>Algunos de nuestros proyectos realizados</p>
+            </div>
+        
+            <!-- Contenedor principal del carrusel -->
+            <div class="gallery-carousel">
+                <!-- Contenedor donde se cargan dinámicamente las imágenes -->
+                <div class="gallery-container" id="galleryContainer">
+                    <!-- Las imágenes se cargarán dinámicamente con JavaScript -->
+                </div>
+                
+                <!-- Controles de navegación del carrusel -->
+                <div class="gallery-controls">
+                    <button class="gallery-btn gallery-prev" id="galleryPrev">
+                        <i class="fas fa-chevron-left"></i>
+                    </button>
+                    <button class="gallery-btn gallery-next" id="galleryNext">
+                        <i class="fas fa-chevron-right"></i>
+                    </button>
+                </div>
+                
+                <!-- Indicadores de posición del carrusel -->
+                <div class="gallery-indicators" id="galleryIndicators">
+                    <!-- Los indicadores se generarán dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal para visualización ampliada de imágenes -->
+    <div id="galleryModal" class="gallery-modal">
+        <div class="modal-content">
+            <!-- Botón para cerrar el modal -->
+            <span class="modal-close" id="modalClose">&times;</span>
+            <!-- Imagen principal del modal -->
+            <img id="modalImage" src="" alt="">
+            <!-- Navegación dentro del modal -->
+            <div class="modal-nav">
+                <button class="modal-btn modal-prev" id="modalPrev">
+                    <i class="fas fa-chevron-left"></i>
+                </button>
+                <button class="modal-btn modal-next" id="modalNext">
+                    <i class="fas fa-chevron-right"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Testimonios -->
     <section id="testimonios" class="testimonials">
         <div class="container">

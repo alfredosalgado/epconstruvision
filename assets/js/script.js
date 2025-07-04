@@ -474,7 +474,7 @@ document.addEventListener('DOMContentLoaded', function() {
  */
 function initGallery() {
     // CONFIGURACIÓN PRINCIPAL
-    const TOTAL_IMAGES = 29; // Número total de imágenes en la carpeta galeria
+    const TOTAL_IMAGES = 73; // Número total de imágenes en la carpeta galeria
     const AUTO_ADVANCE_INTERVAL = 4000; // Tiempo para avance automático (4 segundos)
     
     // Elementos DOM principales

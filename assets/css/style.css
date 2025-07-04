@@ -136,7 +136,7 @@ p {
 
 /* Header y Navegación */
 .header {
-    background: var(--white);
+    background: #3f4a5c;
     box-shadow: var(--shadow-light);
     position: fixed;
     top: 0;
@@ -176,14 +176,14 @@ p {
 
 .nav-link {
     text-decoration: none;
-    color: var(--text-dark);
+    color: var(--white);
     font-weight: 500;
     transition: var(--transition-fast);
     position: relative;
 }
 
 .nav-link:hover {
-    color: var(--primary-blue);
+    color: var(--primary-orange);
 }
 
 .nav-link::after {
@@ -210,14 +210,18 @@ p {
 .bar {
     width: 25px;
     height: 3px;
-    background: var(--text-dark);
+    background: var(--white);
     margin: 3px 0;
     transition: var(--transition-fast);
 }
 
 /* Hero Section */
 .hero {
-    background: linear-gradient(135deg, var(--light-gray) 0%, #e2e8f0 100%);
+    background: linear-gradient(135deg, rgba(248, 250, 252, 0.829) 0%, rgba(226, 232, 240, 0.562) 100%), url('../img/heropc.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
     padding: 160px 0 80px;
     min-height: 90vh;
     display: flex;
@@ -823,12 +827,20 @@ p {
 }
 
 @media (max-width: 992px) {
+    .hero {
+        background: linear-gradient(135deg, rgba(248, 250, 252, 0.9) 0%, rgba(226, 232, 240, 0.9) 100%), url('../img/heromovil.jpeg');
+        background-size: cover;
+        background-position: center;
+        background-repeat: no-repeat;
+        background-attachment: scroll;
+    }
+
     .nav-menu {
         position: fixed;
         left: -100%;
         top: 70px;
         flex-direction: column;
-        background-color: var(--white);
+        background-color: #3f4a5c;
         width: 100%;
         text-align: center;
         transition: var(--transition-fast);

@@ -291,7 +291,13 @@ p {
 /* Por qué nos prefieren */
 .why-choose-us {
     padding: var(--section-padding);
-    background: var(--white);
+    background: #3f4a5c;
+    color: var(--white);
+}
+
+.why-choose-us h2,
+.why-choose-us p {
+    color: var(--white);
 }
 
 .features-grid {
@@ -703,7 +709,11 @@ p {
 /* Contacto */
 .contact {
     padding: var(--section-padding);
-    background: var(--light-gray);
+    background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('../img/contact.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
 }
 
 .contact-content {
@@ -733,8 +743,32 @@ p {
 }
 
 .contact-details h3 {
-    color: var(--dark-gray);
+    color: var(--white);
     margin-bottom: 0.5rem;
+}
+
+.contact-details p {
+    color: var(--white);
+}
+
+.contact h2 {
+    color: var(--white);
+}
+
+.contact .section-header p {
+    color: var(--white);
+}
+
+.contact-details a {
+    color: var(--primary-orange);
+    text-decoration: none;
+    transition: var(--transition-fast);
+    font-weight: 500;
+}
+
+.contact-details a:hover {
+    color: var(--white);
+    text-decoration: underline;
 }
 
 .contact-cta {

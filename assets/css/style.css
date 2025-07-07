@@ -351,7 +351,25 @@ p {
 /* Nosotros */
 .about {
     padding: var(--section-padding);
-    background: var(--light-gray);
+    background: #3f4a5c;
+    color: var(--white);
+}
+
+.about h2,
+.about p {
+    color: var(--white);
+}
+
+.about .mission,
+.about .vision {
+    color: var(--text-dark);
+}
+
+.about .mission h3,
+.about .vision h3,
+.about .mission p,
+.about .vision p {
+    color: var(--text-dark);
 }
 
 .about-content {
@@ -392,7 +410,16 @@ p {
 /* Valores */
 .values {
     padding: var(--section-padding);
-    background: var(--white);
+    background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('../img/bg_valores.jpeg');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    color: var(--white);
+}
+
+.values h2,
+.values p {
+    color: var(--white);
 }
 
 .values-grid {
@@ -442,10 +469,31 @@ p {
     hyphens: auto;
 }
 
+.value-card p {
+    color: var(--text-dark);
+}
+
 /* Servicios */
 .services {
     padding: var(--section-padding);
-    background: var(--light-gray);
+    background: #3f4a5c;
+    color: var(--white);
+}
+
+.services h2,
+.services p {
+    color: var(--white);
+}
+
+.services .service-card,
+.services .service-content {
+    color: var(--text-dark);
+}
+
+.services .service-content h3,
+.services .service-content p,
+.services .service-list li {
+    color: var(--text-dark);
 }
 
 .services-grid {
@@ -519,7 +567,7 @@ p {
     position: relative;
     overflow: visible;
     border-radius: 15px;
-    min-height: 450px;
+    min-height: 250px;
 }
 
 .testimonials-container {
@@ -1221,7 +1269,7 @@ html {
 }
 
 .gallery-btn:hover {
-    background: var(--primary-color);
+    background: rgba(0, 0, 0, 0.7);
     transform: scale(1.1);
 }
 

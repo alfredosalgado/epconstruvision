@@ -514,6 +514,9 @@ p {
     overflow: hidden;
     box-shadow: var(--shadow-light);
     transition: var(--transition-medium);
+    display: flex;
+    flex-direction: column;
+    height: 100%;
 }
 
 .service-card:hover {
@@ -539,6 +542,9 @@ p {
 
 .service-content {
     padding: 2rem;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
 }
 
 .service-content h3 {
@@ -549,6 +555,7 @@ p {
 .service-list {
     list-style: none;
     margin: 1.5rem 0;
+    flex-grow: 1;
 }
 
 .service-list li {
